@@ -1,0 +1,5 @@
+{
+  "watch": ["app", "lib", "modules", "shared", ".env"],
+  "ext": "ts,json,yaml",
+  "exec": "tsx --import dotenv/config -r tsconfig-paths/register index.ts"
+}
