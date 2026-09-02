@@ -1,13 +1,9 @@
-import { userVerificationInCore } from '@/shared/db/schema';
-import { createInsertSchema } from 'drizzle-zod';
 import z from 'zod';
 
-export const createUserVerificationSchema = createInsertSchema(
-  userVerificationInCore
-).pick({
-  userId: true,
-  token: true,
-  type: true,
+export const createUserVerificationSchema = z.object({
+  userId: z.string().nonempty(),
+  token: z.string().nonempty(),
+  type: z.enum(['OTP', 'VERIFICATION', 'RESET_PASSWORD']),
 });
 export type CreateUserVerification = z.infer<
   typeof createUserVerificationSchema

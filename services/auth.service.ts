@@ -11,11 +11,11 @@ import {
   UserVerificationRepository,
 } from '@/repositories';
 import { Env } from '@/shared/env';
-import { db, TransactionClient } from '@/shared/lib/db';
 import { EmailService } from '@/shared/lib/email';
 import { BadRequestError } from '@/shared/lib/error';
 import { compareHash, generateHash } from '@/shared/lib/hash';
 import { JwtPayload, signJwt } from '@/shared/lib/jwt';
+import { db } from '@/shared/lib/db';
 import { RedisService } from '@/shared/lib/redis';
 import { UserAccountRepository } from '@/shared/lib/session';
 import { Message } from '@/shared/messages';
@@ -23,9 +23,8 @@ import { generateRandomString } from '@/shared/utils/string';
 import { randomUUID } from 'crypto';
 import { add } from 'date-fns';
 
-async function signUpService(inputData: SignUpDto, tx?: TransactionClient) {
-  const dbClient = tx || db;
-  const signUpData = await dbClient.transaction(async (tx) => {
+async function signUpService(inputData: SignUpDto) {
+  const signUpData = await db.transaction(async (tx) => {
     const { username, email, password } = inputData;
 
     const existingUser = await UserAccountRepository.findByCredential(
@@ -138,6 +137,9 @@ async function signOutAllService(userId: string, email: string) {
 async function refreshTokenService(userId: string, sessionId: string) {
   const refreshTokenData = await db.transaction(async (tx) => {
     const user = await UserAccountRepository.findById(tx, userId);
+    if (!user) {
+      throw new BadRequestError(Message.USER.NOT_FOUND);
+    }
 
     const jwtPayload: JwtPayload = {
       email: user.email,

@@ -1,72 +1,51 @@
 import { CreateUserVerification } from '@/dto/user-verification.dto';
-import { userVerificationInCore } from '@/shared/db/schema';
-import { buildWhereClause, TransactionClient } from '@/shared/lib/db';
+import { TransactionClient } from '@/shared/lib/db';
 import { catchAsyncRepository } from '@/shared/lib/error';
-import { randomUUID } from 'crypto';
+import { UserVerification } from '@/types';
 import { add } from 'date-fns';
-import { eq } from 'drizzle-orm';
 
 const findUserVerificationByTokenRepository = catchAsyncRepository(
   async (tx: TransactionClient, token: string) => {
-    const whereClause = buildWhereClause({
-      table: userVerificationInCore,
-      andClause: [eq(userVerificationInCore.token, token)],
-    });
-    const data = await tx
-      .select()
-      .from(userVerificationInCore)
-      .where(whereClause);
-    return data[0];
+    const query = await tx<UserVerification>('core.user_verification')
+      .where('token', token)
+      .first();
+    return query;
   }
 );
 
 const createUserVerificationRepository = catchAsyncRepository(
   async (tx: TransactionClient, inputData: CreateUserVerification) => {
-    const data = await tx
-      .insert(userVerificationInCore)
-      .values({
-        ...inputData,
-        id: randomUUID(),
-        expiredAt: add(new Date(), { minutes: 3 }).toISOString(),
-        isUsed: false,
-      })
-      .returning();
+    const insertedData = {
+      ...inputData,
+      expiredAt: add(new Date(), { minutes: 3 }).toISOString(),
+      isUsed: false,
+    };
+    const data = await tx<UserVerification>('core.user_verification').insert(
+      insertedData,
+      ['id']
+    );
     return data[0];
   }
 );
 
 const setUserVerificationVerifiedRepository = catchAsyncRepository(
   async (tx: TransactionClient, token: string) => {
-    const whereClause = buildWhereClause({
-      table: userVerificationInCore,
-      andClause: [eq(userVerificationInCore.token, token)],
-    });
-
-    const data = await tx
-      .update(userVerificationInCore)
-      .set({
-        isVerified: true,
-      })
-      .where(whereClause)
-      .returning();
+    const data = await tx<UserVerification>('core.user_verification').update(
+      'isVerified',
+      true,
+      ['id']
+    );
     return data[0];
   }
 );
 
 const setUserVerificationUsedRepository = catchAsyncRepository(
   async (tx: TransactionClient, token: string) => {
-    const whereClause = buildWhereClause({
-      table: userVerificationInCore,
-      andClause: [eq(userVerificationInCore.token, token)],
-    });
-
-    const data = await tx
-      .update(userVerificationInCore)
-      .set({
-        isUsed: true,
-      })
-      .where(whereClause)
-      .returning();
+    const data = await tx<UserVerification>('core.user_verification').update(
+      'isUsed',
+      true,
+      ['id']
+    );
     return data[0];
   }
 );

@@ -1,12 +1,9 @@
-import { userSessionInCore } from '@/shared/db/schema';
-import { createInsertSchema } from 'drizzle-zod';
 import z from 'zod';
 
-export const createUserSessionSchema = createInsertSchema(
-  userSessionInCore
-).pick({
-  id: true,
-  userId: true,
-  expiredAt: true,
+const createUserSessionSchema = z.object({
+  id: z.string().optional(),
+  userId: z.string().nonempty(),
+  expiredAt: z.iso.datetime().nonempty(),
 });
+
 export type CreateUserSessionDto = z.infer<typeof createUserSessionSchema>;
