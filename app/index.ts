@@ -1,4 +1,4 @@
-import { authRouter } from '@/app/router';
+import { authRouter } from '@/router/auth.router';
 import { connectEmail } from '@/shared/lib/email';
 import { errorHandler, NotFoundError } from '@/shared/lib/error';
 import { loggerMiddleware } from '@/shared/lib/logger';
