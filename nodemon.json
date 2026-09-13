@@ -5,8 +5,10 @@
     "dto",
     "lib",
     "repositories",
+    "router",
     "services",
     "shared",
+    "types",
     ".env"
   ],
   "ext": "ts,json,yaml",

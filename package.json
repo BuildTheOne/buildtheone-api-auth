@@ -11,7 +11,7 @@
     "start": "node build/index.js",
     "lint": "eslint --fix app lib modules shared",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"app\" \"controllers\" \"dto\" \"lib\" \"modules\" \"repositories\" \"services\" \"types\" \"shared\"",
+    "format": "prettier --write \"app\" \"controllers\" \"dto\" \"lib\" \"repositories\" \"router\" \"services\" \"types\" \"shared\"",
     "prepare": "husky",
     "lang-check": "pnpm tsx ./shared/scripts/lang-check"
   },
