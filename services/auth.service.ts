@@ -184,7 +184,7 @@ async function changePasswordService(data: ChangePasswordDto, userId: string) {
 
     const isPasswordMatch = await compareHash(oldPassword, user.password);
     if (!isPasswordMatch) {
-      throw new BadRequestError();
+      throw new BadRequestError(Message.AUTH.PASSWORD_INVALID);
     }
 
     const newPasswordHashed = await generateHash(newPassword);
@@ -259,7 +259,7 @@ async function verifyResetPasswordRequestService(otpToken?: string) {
       throw new BadRequestError(Message.AUTH.OTP_NOT_FOUND);
     }
 
-    if (new Date(userVerification.expiredAt) > new Date()) {
+    if (userVerification.expiredAt < new Date()) {
       throw new BadRequestError(Message.AUTH.OTP_EXPIRED);
     }
     if (userVerification.isUsed) {
@@ -288,7 +288,7 @@ async function resetPasswordService(data: ResetPasswordDto, otpToken?: string) {
     if (!userVerification) {
       throw new BadRequestError(Message.AUTH.OTP_NOT_FOUND);
     }
-    if (new Date(userVerification.expiredAt) > new Date()) {
+    if (userVerification.expiredAt < new Date()) {
       throw new BadRequestError(Message.AUTH.OTP_EXPIRED);
     }
     if (userVerification.isUsed) {

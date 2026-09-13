@@ -1,8 +1,10 @@
 import { SignUpDto } from '@/dto/sign-up.dto';
+import { buildWhereQuery, TransactionClient } from '@/shared/lib/db';
 import { catchAsyncRepository } from '@/shared/lib/error';
-import { TransactionClient } from '@/shared/lib/db';
 import { UserAccount } from '@/shared/lib/session';
 import { randomUUID } from 'crypto';
+
+const returnField = ['id', 'email', 'username', 'displayName'];
 
 const createUserAccountRepository = catchAsyncRepository(
   async (tx: TransactionClient, inputData: SignUpDto) => {
@@ -12,34 +14,57 @@ const createUserAccountRepository = catchAsyncRepository(
       isActive: true,
       displayName: inputData.displayName ?? inputData.username,
     };
-    const query = await tx<UserAccount>('core.user_account').insert(
-      insertedData,
-      ['id', 'email', 'username', 'displayName']
-    );
-    return query[0];
+    const insertQueryRaw = buildWhereQuery<UserAccount>({
+      tx: tx,
+      tableName: 'core.user_account',
+    });
+
+    const insertQuery = await insertQueryRaw.insert(insertedData, returnField);
+    const data = insertQuery[0];
+    return data;
   }
 );
 
 const updateUserAccountLastLoginByIdRepository = catchAsyncRepository(
   async (tx: TransactionClient, id: string) => {
-    const query = await tx<UserAccount>('core.user_account')
-      .update('lastLoginAt', new Date(), [
-        'id',
-        'email',
-        'username',
-        'displayName',
-      ])
-      .where('id', id);
-    return query[0];
+    const updatedData = {
+      id: id,
+      lastLoginAt: new Date().toISOString(),
+      updatedAt: new Date(),
+    };
+
+    const updateQueryRaw = buildWhereQuery<UserAccount>({
+      tx: tx,
+      tableName: 'core.user_account',
+      andCondition: {
+        id: id,
+      },
+    });
+
+    const updateQuery = await updateQueryRaw.update(updatedData, returnField);
+    const data = updateQuery[0];
+    return data;
   }
 );
 
 const updateUserAccountPasswordByIdRepository = catchAsyncRepository(
   async (tx: TransactionClient, id: string, password: string) => {
-    const query = await tx<UserAccount>('core.user_account')
-      .update('password', password, ['id', 'email', 'username', 'displayName'])
-      .where('id', id);
-    return query[0];
+    const updatedData = {
+      password: password,
+      updatedAt: new Date(),
+    };
+
+    const updateQueryRaw = buildWhereQuery<UserAccount>({
+      tx: tx,
+      tableName: 'core.user_account',
+      andCondition: {
+        id: id,
+      },
+    });
+
+    const updateQuery = await updateQueryRaw.update(updatedData, returnField);
+    const data = updateQuery[0];
+    return data;
   }
 );
 

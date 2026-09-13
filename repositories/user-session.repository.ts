@@ -1,32 +1,53 @@
 import { CreateUserSessionDto } from '@/dto/user-session.dto';
+import { buildWhereQuery, TransactionClient } from '@/shared/lib/db';
 import { catchAsyncRepository } from '@/shared/lib/error';
-import { TransactionClient } from '@/shared/lib/db';
 import { UserSession } from '@/shared/lib/session';
+
+const returnField = ['id'];
 
 const createUserSessionRepository = catchAsyncRepository(
   async (tx: TransactionClient, inputData: CreateUserSessionDto) => {
-    const query = await tx<UserSession>('core.user_session').insert(inputData, [
-      'id',
-    ]);
-    return query[0];
+    const insertedData = {
+      ...inputData,
+    };
+    const insertQueryRaw = buildWhereQuery<UserSession>({
+      tx: tx,
+      tableName: 'core.user_session',
+    });
+
+    const insertQuery = await insertQueryRaw.insert(insertedData, returnField);
+    const data = insertQuery[0];
+    return data;
   }
 );
 
 const deleteUserSessionByIdRepository = catchAsyncRepository(
   async (tx: TransactionClient, id: string) => {
-    const query = await tx<UserSession>('core.user_session')
-      .delete(['id'])
-      .andWhere('id', id);
-    return query[0];
+    const deleteQueryRaw = buildWhereQuery<UserSession>({
+      tx: tx,
+      tableName: 'core.user_session',
+      andCondition: {
+        id: id,
+      },
+    });
+    const insertQuery = await deleteQueryRaw.delete(returnField);
+    const data = insertQuery[0];
+    return data;
   }
 );
 
 const deleteUserSessionByUserIdRepository = catchAsyncRepository(
   async (tx: TransactionClient, userId: string) => {
-    const query = await tx<UserSession>('core.user_session')
-      .delete(['id'])
-      .andWhere('userId', userId);
-    return query[0];
+    const deleteQueryRaw = buildWhereQuery<UserSession>({
+      tx: tx,
+      tableName: 'core.user_session',
+      andCondition: {
+        userId: userId,
+      },
+    });
+    const insertQuery = await deleteQueryRaw.delete(returnField);
+    const data = insertQuery[0];
+    return data;
   }
 );
 
