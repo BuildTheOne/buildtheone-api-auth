@@ -7,50 +7,46 @@ import {
   signUpSchema,
 } from '@/dto';
 import { sessionMiddleware } from '@/shared/lib/session';
-import { ServerRoute } from '@/shared/routes';
+import { Route } from '@/shared/routes';
 import { validateForm } from '@/shared/utils/validation';
 import { Router } from 'express';
 
 const authRouter = Router();
 
 authRouter.post(
-  ServerRoute.sign_up,
+  Route.sign_up,
   validateForm(signUpSchema),
   AuthController.signUp
 );
 authRouter.post(
-  ServerRoute.sign_in,
+  Route.sign_in,
   validateForm(signInSchema),
   AuthController.signIn
 );
+authRouter.post(Route.sign_out, sessionMiddleware, AuthController.signOut);
 authRouter.post(
-  ServerRoute.sign_out,
-  sessionMiddleware,
-  AuthController.signOut
-);
-authRouter.post(
-  ServerRoute.sign_out_all,
+  Route.sign_out_all,
   sessionMiddleware,
   AuthController.signOutAll
 );
-authRouter.post(ServerRoute.refresh_token, AuthController.refreshToken);
+authRouter.post(Route.refresh_token, AuthController.refreshToken);
 authRouter.post(
-  ServerRoute.change_password,
+  Route.change_password,
   sessionMiddleware,
   validateForm(changePasswordSchema),
   AuthController.changePassword
 );
 authRouter.post(
-  ServerRoute.reset_password_request,
+  Route.reset_password_request,
   validateForm(resetPasswordRequestSchema),
   AuthController.resetPasswordRequest
 );
 authRouter.post(
-  ServerRoute.verify_reset_password_request,
+  Route.verify_reset_password_request,
   AuthController.verifyResetPasswordRequest
 );
 authRouter.post(
-  ServerRoute.reset_password,
+  Route.reset_password,
   validateForm(resetPasswordSchema),
   AuthController.resetPassword
 );
